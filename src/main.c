@@ -85,7 +85,7 @@ static void usb_cdc_interrupt_handler(const struct device *dev, void *user_data)
             if (bytes_read > 0) {
                 LOG_DBG("USB RX: %d bytes", bytes_read);
                 
-                /* Put data into ring buffer for Gazelle transmission */
+                /* Put data into ring buffer for ESB transmission */
                 uint32_t written = ring_buf_put(&usb_to_esb_rb, buffer, bytes_read);
                 if (written < bytes_read) {
                     LOG_WRN("USB RX buffer overflow, lost %d bytes", bytes_read - written);
@@ -192,81 +192,81 @@ static void configure_uart_1mbps(void)
     LOG_INF("UART configured for 1Mbps");
 }
 
-/* Configure Gazelle protocol */
-static void configure_gazelle(void)
+/* Configure ESB protocol */
+static void configure_esb(void)
 {
     int ret;
     
     ret = esb_init();
     if (ret != 0) {
-        LOG_ERR("Failed to initialize Gazelle: %d", ret);
+        LOG_ERR("Failed to initialize ESB: %d", ret);
         return;
     }
     
     ret = esb_set_callbacks(esb_rx_handler, esb_tx_complete_handler, 
                                esb_error_handler);
     if (ret != 0) {
-        LOG_ERR("Failed to set Gazelle callbacks: %d", ret);
+        LOG_ERR("Failed to set ESB callbacks: %d", ret);
         return;
     }
     
     ret = esb_set_channel(ESB_CHANNEL);
     if (ret != 0) {
-        LOG_ERR("Failed to set Gazelle channel: %d", ret);
+        LOG_ERR("Failed to set ESB channel: %d", ret);
         return;
     }
     
     ret = esb_set_power(0); /* 0 dBm */
     if (ret != 0) {
-        LOG_ERR("Failed to set Gazelle power: %d", ret);
+        LOG_ERR("Failed to set ESB power: %d", ret);
         return;
     }
     
     ret = esb_enable();
     if (ret != 0) {
-        LOG_ERR("Failed to enable Gazelle: %d", ret);
+        LOG_ERR("Failed to enable ESB: %d", ret);
         return;
     }
     
-    LOG_INF("Gazelle configured and enabled");
+    LOG_INF("ESB configured and enabled");
     led_set_esb_status(true);
 }
 
-/* Gazelle RX handler */
+/* ESB RX handler */
 static void esb_rx_handler(esb_packet_t *packet)
 {
     if (packet == NULL || packet->length == 0) {
-        LOG_WRN("Invalid Gazelle packet received");
+        LOG_WRN("Invalid ESB packet received");
         return;
     }
     
-    LOG_DBG("Gazelle RX: pipe=%d, len=%d, rssi=%d", 
+    LOG_DBG("ESB RX: pipe=%d, len=%d, rssi=%d", 
             packet->pipe_id, packet->length, packet->rssi);
     
     /* Put received data into ring buffer for USB transmission */
     uint32_t written = ring_buf_put(&esb_to_usb_rb, packet->data, packet->length);
     if (written < packet->length) {
-        LOG_WRN("Gazelle RX buffer overflow, lost %d bytes", 
+        LOG_WRN("ESB RX buffer overflow, lost %d bytes", 
                 packet->length - written);
     }
     
     led_set_activity(true);
 }
 
-/* Gazelle TX complete handler */
+/* ESB TX complete handler */
 static void esb_tx_complete_handler(uint8_t pipe_id, bool success)
 {
     if (success) {
-        LOG_DBG("Gazelle TX success on pipe %d", pipe_id);
+        LOG_DBG("ESB TX success on pipe %d", pipe_id);
     } else {
-        LOG_WRN("Gazelle TX failed on pipe %d", pipe_id);
+        LOG_WRN("ESB TX failed on pipe %d", pipe_id);
     }
 }
 
-/* Gazelle error handler */
+/* ESB error handler */
 static void esb_error_handler(uint8_t error_code)
 {
-    LOG_ERR("Gazelle error: %d", error_code);
+    LOG_ERR("ESB error: %d", error_code);
     
     /* Flash error LED pattern */
     for (int i = 0; i < 5; i++) {
@@ -292,17 +292,17 @@ static void data_bridge_thread(void *arg1, void *arg2, void *arg3)
     LOG_INF("Data bridge thread started");
     
     while (1) {
-        /* Forward data from USB to Gazelle */
+        /* Forward data from USB to ESB */
         bytes_available = ring_buf_get(&usb_to_esb_rb, buffer, sizeof(buffer));
         if (bytes_available > 0) {
-            /* Send data via Gazelle in chunks if necessary */
+            /* Send data via ESB in chunks if necessary */
             uint32_t offset = 0;
             while (offset < bytes_available) {
                 uint8_t chunk_size = MIN(ESB_DEFAULT_PAYLOAD, bytes_available - offset);
                 
                 ret = esb_send_packet(0, &buffer[offset], chunk_size, false);
                 if (ret != 0) {
-                    LOG_WRN("Failed to send Gazelle packet: %d", ret);
+                    LOG_WRN("Failed to send ESB packet: %d", ret);
                     /* Put remaining data back in ring buffer */
                     ring_buf_put(&usb_to_esb_rb, &buffer[offset], 
                                bytes_available - offset);
@@ -310,11 +310,11 @@ static void data_bridge_thread(void *arg1, void *arg2, void *arg3)
                 }
                 
                 offset += chunk_size;
-                LOG_DBG("USB->Gazelle: %d bytes", chunk_size);
+                LOG_DBG("USB->ESB: %d bytes", chunk_size);
             }
         }
         
-        /* Forward data from Gazelle to USB */
+        /* Forward data from ESB to USB */
         bytes_available = ring_buf_get(&esb_to_usb_rb, buffer, sizeof(buffer));
         if (bytes_available > 0) {
             bytes_written = uart_fifo_fill(usb_dev, buffer, bytes_available);
@@ -324,7 +324,7 @@ static void data_bridge_thread(void *arg1, void *arg2, void *arg3)
                 ring_buf_put(&esb_to_usb_rb, &buffer[bytes_written], 
                            bytes_available - bytes_written);
             } else {
-                LOG_DBG("Gazelle->USB: %d bytes", bytes_written);
+                LOG_DBG("ESB->USB: %d bytes", bytes_written);
             }
         }
         
@@ -343,9 +343,9 @@ K_THREAD_DEFINE(bridge_thread, 2048, data_bridge_thread, NULL, NULL, NULL, 5, 0,
 int main(void)
 {
     #if ESB_DEVICE_MODE == 0
-    LOG_INF("nRF52840 USB-UART-Gazelle Bridge starting in HOST mode...");
+    LOG_INF("nRF52840 USB-UART-ESB Bridge starting in HOST mode...");
     #else
-    LOG_INF("nRF52840 USB-UART-Gazelle Bridge starting in DEVICE mode...");
+    LOG_INF("nRF52840 USB-UART-ESB Bridge starting in DEVICE mode...");
     #endif
     
     /* Configure hardware */
@@ -365,21 +365,21 @@ int main(void)
         /* Log buffer usage warnings */
         if (usb_to_esb_used > RING_BUF_SIZE * 0.8 || 
             esb_to_usb_used > RING_BUF_SIZE * 0.8) {
-            LOG_WRN("Buffer usage high - USB->Gazelle: %d, Gazelle->USB: %d", 
+            LOG_WRN("Buffer usage high - USB->ESB: %d, ESB->USB: %d", 
                     usb_to_esb_used, esb_to_usb_used);
         }
         
-        /* Monitor Gazelle connectivity */
+        /* Monitor ESB connectivity */
         if (!esb_is_enabled()) {
-            LOG_ERR("Gazelle connection lost, attempting to re-enable");
+            LOG_ERR("ESB connection lost, attempting to re-enable");
             led_set_esb_status(false);
             
-            /* Attempt to re-enable Gazelle */
+            /* Attempt to re-enable ESB */
             if (esb_enable() == 0) {
-                LOG_INF("Gazelle re-enabled successfully");
+                LOG_INF("ESB re-enabled successfully");
                 led_set_esb_status(true);
             } else {
-                LOG_ERR("Failed to re-enable Gazelle");
+                LOG_ERR("Failed to re-enable ESB");
             }
         }
         
