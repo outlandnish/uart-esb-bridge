@@ -1,0 +1,80 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "/home/nutriarm/gazelle-link/include",
+                "/home/nutriarm/gazelle-link/src",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/include",
+                "/home/nutriarm/gazelle-link/.pio/build/gazelle_host/zephyr/include/generated",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/soc/arm/nordic_nrf/nrf52",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/cmsis/CMSIS/Core/Include",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/nordic/nrfx",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/nordic/nrfx/drivers/include",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/nordic/nrfx/mdk",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/modules/hal_nordic/nrfx",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/debug/segger/SEGGER",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/debug/segger/Config",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/modules/segger",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/home/nutriarm/gazelle-link/include",
+                    "/home/nutriarm/gazelle-link/src",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/include",
+                    "/home/nutriarm/gazelle-link/.pio/build/gazelle_host/zephyr/include/generated",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/soc/arm/nordic_nrf/nrf52",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/cmsis/CMSIS/Core/Include",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/nordic/nrfx",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/nordic/nrfx/drivers/include",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/hal/nordic/nrfx/mdk",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/modules/hal_nordic/nrfx",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/debug/segger/SEGGER",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/_pio/modules/debug/segger/Config",
+                    "/home/nutriarm/.platformio/packages/framework-zephyr/modules/segger",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60118",
+                "ARDUINO_NRF52_DK",
+                "GAZELLE_DEVICE_MODE=0",
+                "BUILD_VERSION=zephyr-v20701",
+                "KERNEL",
+                "NRF52840_XXAA",
+                "_FORTIFY_SOURCE=2",
+                "__PROGRAM_START",
+                "__ZEPHYR__=1",
+                ""
+            ],
+            "cStandard": "c99",
+            "forcedInclude": [
+                "/home/nutriarm/gazelle-link/.pio/build/gazelle_host/zephyr/include/generated/autoconf.h",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/include/toolchain/zephyr_stdint.h",
+                ""
+            ],
+            "compilerPath": "/home/nutriarm/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mcpu=cortex-m4",
+                "-mthumb",
+                "-mabi=aapcs",
+                "-mfp16-format=ieee",
+                "-isystem",
+                "/home/nutriarm/.platformio/packages/framework-zephyr/lib/libc/minimal/include",
+                "-isystem",
+                "/home/nutriarm/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/10.3.1/include",
+                "-isystem",
+                "/home/nutriarm/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/10.3.1/include-fixed",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
